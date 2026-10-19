@@ -90,7 +90,7 @@ def generate_deepseek_output(prompt: str) -> str:
     response = requests.post(
     url="https://openrouter.ai/api/v1/chat/completions",
     headers={
-        "Authorization": f"Bearer {KEYS["OPENAI_API_KEY"]}",
+        "Authorization": f"Bearer {KEYS['OPENAI_API_KEY']}",
         "Content-Type": "application/json",
     },
     data=json.dumps({
@@ -120,7 +120,7 @@ def generate_llama_output(prompt: str) -> str:
     response = requests.post(
     url="https://openrouter.ai/api/v1/chat/completions",
     headers={
-        "Authorization": f"Bearer {KEYS["OPENAI_API_KEY"]}",
+        "Authorization": f"Bearer {KEYS['OPENAI_API_KEY']}",
         "Content-Type": "application/json",
     },
     data=json.dumps({
