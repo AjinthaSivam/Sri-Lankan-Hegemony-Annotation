@@ -1,4 +1,5 @@
 <script>
+  const APP_ROOT = {{ request.script_root | tojson }};  // "/flask" behind the proxy, "" locally
   const regionStateMap = {{ region_state_map | tojson }};
 
   // Determine defaults:
@@ -87,7 +88,7 @@ async function generateOutput(model, kind) {
 
   // 3. Call backend
   try {
-    const response = await fetch(`/generate/${model}`, {
+    const response = await fetch(`${APP_ROOT}/generate/${model}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt })
@@ -252,7 +253,7 @@ async function checkPromptSimilarity() {
   btn.textContent = "Checking...";
 
   try {
-    const response = await fetch("/check-prompt-similarity", {
+    const response = await fetch(`${APP_ROOT}/check-prompt-similarity`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -327,7 +328,7 @@ async function saveAnnotationDraft() {
   btn.textContent = "Saving...";
 
   try {
-    const response = await fetch("/save-annotation-draft", {
+    const response = await fetch(`${APP_ROOT}/save-annotation-draft`, {
       method: "POST",
       body: formData
     });
