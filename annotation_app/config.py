@@ -54,12 +54,16 @@ REGION_STATE_MAP = {
 # Include "admin" only if the application expects it to appear here.
 ONBOARDED_ANNOTATOR_USERNAMES = [
     "admin",
+	"moana",
+	"r1"
 ]
 
 # Replace the example province with the admin's actual province.
 # Add each annotator's province using the exact names in REGION_STATE_MAP.
 ONBOARDED_ANNOTATOR_USERNAMES_STATES = {
-    "admin": "Northern",
+    "admin": "Trincomalee",
+	"moana": "Jaffna",
+	"r1": "Nuwara Eliya"
 }
 
 
@@ -147,7 +151,8 @@ API_KEYS_PATH = BASE_DIR / "accounts" / "apikeys.json"
 with open(API_KEYS_PATH, "r") as f:
 	KEYS = json.load(f)
 
-# llama is actually GPT-OSS
+# Model 3 uses the legacy `llama` key for GPT-OSS; Model 1 and 2 use
+# explicit provider model names in the sheet while retaining legacy app keys.
 HEADERS = [
 	# --- metadata ---
 	"id",
@@ -160,69 +165,70 @@ HEADERS = [
 	"base_prompt",
 	"identity_prompt",
 
-	# === GEMINI BASE ===
-	# "gemini_base_output",
-	# "gemini_base_hallucination",
-	# "gemini_base_social",
-	# "gemini_base_social_impact",
-	# "gemini_base_economic",
-	# "gemini_base_economic_impact",
-	# "gemini_base_religious",
-	# "gemini_base_religious_impact",
-	# "gemini_base_gender",
-	# "gemini_base_gender_impact",
-	# "gemini_base_linguistic",
-	# "gemini_base_linguistic_impact",
-	# "gemini_base_colorism",
-	# "gemini_base_colorism_impact",
+	# === LLAMA 4 MAVERICK BASE ===
+	"llama4_maverick_base_output",
+	"llama4_maverick_base_hallucination",
+	"llama4_maverick_base_social",
+	"llama4_maverick_base_social_impact",
+	"llama4_maverick_base_economic",
+	"llama4_maverick_base_economic_impact",
+	"llama4_maverick_base_religious",
+	"llama4_maverick_base_religious_impact",
+	"llama4_maverick_base_gender",
+	"llama4_maverick_base_gender_impact",
+	"llama4_maverick_base_linguistic",
+	"llama4_maverick_base_linguistic_impact",
+	"llama4_maverick_base_colorism",
+	"llama4_maverick_base_colorism_impact",
 
 	# === GEMINI IDENTITY ===
-	# "gemini_identity_output",
-	# "gemini_identity_hallucination",
-	# "gemini_identity_social",
-	# "gemini_identity_social_impact",
-	# "gemini_identity_economic",
-	# "gemini_identity_economic_impact",
-	# "gemini_identity_religious",
-	# "gemini_identity_religious_impact",
-	# "gemini_identity_gender",
-	# "gemini_identity_gender_impact",
-	# "gemini_identity_linguistic",
-	# "gemini_identity_linguistic_impact",
-	# "gemini_identity_colorism",
-	# "gemini_identity_colorism_impact",
+	"llama4_maverick_identity_output",
+	"llama4_maverick_identity_hallucination",
+	"llama4_maverick_identity_social",
+	"llama4_maverick_identity_social_impact",
+	"llama4_maverick_identity_economic",
+	"llama4_maverick_identity_economic_impact",
+	"llama4_maverick_identity_religious",
+	"llama4_maverick_identity_religious_impact",
+	"llama4_maverick_identity_gender",
+	"llama4_maverick_identity_gender_impact",
+	"llama4_maverick_identity_linguistic",
+	"llama4_maverick_identity_linguistic_impact",
+	"llama4_maverick_identity_colorism",
+	"llama4_maverick_identity_colorism_impact",
 
 	# === GPT BASE ===
-	# "gpt_base_output",
-	# "gpt_base_hallucination",
-	# "gpt_base_social",
-	# "gpt_base_social_impact",
-	# "gpt_base_economic",
-	# "gpt_base_economic_impact",
-	# "gpt_base_religious",
-	# "gpt_base_religious_impact",
-	# "gpt_base_gender",
-	# "gpt_base_gender_impact",
-	# "gpt_base_linguistic",
-	# "gpt_base_linguistic_impact",
-	# "gpt_base_colorism",
-	# "gpt_base_colorism_impact",
+	# === QWEN3.8-27B BASE ===
+	"qwen3_8_27b_base_output",
+	"qwen3_8_27b_base_hallucination",
+	"qwen3_8_27b_base_social",
+	"qwen3_8_27b_base_social_impact",
+	"qwen3_8_27b_base_economic",
+	"qwen3_8_27b_base_economic_impact",
+	"qwen3_8_27b_base_religious",
+	"qwen3_8_27b_base_religious_impact",
+	"qwen3_8_27b_base_gender",
+	"qwen3_8_27b_base_gender_impact",
+	"qwen3_8_27b_base_linguistic",
+	"qwen3_8_27b_base_linguistic_impact",
+	"qwen3_8_27b_base_colorism",
+	"qwen3_8_27b_base_colorism_impact",
 
 	# === GPT IDENTITY ===
-	# "gpt_identity_output",
-	# "gpt_identity_hallucination",
-	# "gpt_identity_social",
-	# "gpt_identity_social_impact",
-	# "gpt_identity_economic",
-	# "gpt_identity_economic_impact",
-	# "gpt_identity_religious",
-	# "gpt_identity_religious_impact",
-	# "gpt_identity_gender",
-	# "gpt_identity_gender_impact",
-	# "gpt_identity_linguistic",
-	# "gpt_identity_linguistic_impact",
-	# "gpt_identity_colorism",
-	# "gpt_identity_colorism_impact",
+	"qwen3_8_27b_identity_output",
+	"qwen3_8_27b_identity_hallucination",
+	"qwen3_8_27b_identity_social",
+	"qwen3_8_27b_identity_social_impact",
+	"qwen3_8_27b_identity_economic",
+	"qwen3_8_27b_identity_economic_impact",
+	"qwen3_8_27b_identity_religious",
+	"qwen3_8_27b_identity_religious_impact",
+	"qwen3_8_27b_identity_gender",
+	"qwen3_8_27b_identity_gender_impact",
+	"qwen3_8_27b_identity_linguistic",
+	"qwen3_8_27b_identity_linguistic_impact",
+	"qwen3_8_27b_identity_colorism",
+	"qwen3_8_27b_identity_colorism_impact",
 
 	# === LLAMA i.e GPT-OSS-120B BASE ===
 	"llama_base_output",
