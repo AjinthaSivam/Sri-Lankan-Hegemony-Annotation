@@ -6,3 +6,6 @@ annotation_app/__pycache__/*.pyc
 annotation_app/data/
 .DS_Store
 annotators.json
+annotation_app/annotation_app/data/prompt_embeddings.json
+annotation_app/static/annotations.jsonl
+annotation_app/inter_annotator_review_assignments.json

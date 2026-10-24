@@ -3,7 +3,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
 import json
 import os
-from config import KEYS, REGION_STATE_MAP
+from config import KEYS, REGION_STATE_MAP, ONBOARDED_ANNOTATOR_USERNAMES_STATES
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -126,9 +126,12 @@ def login():
             username == KEYS["ADMIN_USERNAME"] and
             check_password_hash(KEYS["ADMIN_PASSWORD_HASH"], password)
         ):
+            admin_state = ONBOARDED_ANNOTATOR_USERNAMES_STATES.get(username, "")
             session["user"] = {
                 "username": username,
-                "role": "admin"
+                "role": "admin",
+                "state": admin_state,
+                "region": get_region_from_state(admin_state),
             }
             return redirect(url_for("annotate"))
 

@@ -77,7 +77,7 @@ annotation_app/
 ├── config.py            → Constants: state/region map, LLM model config, annotator lists, hegemony axes
 ├── storage.py           → JSONL read/write, record builder, Google-Sheets flattening
 ├── sheets.py            → Google Sheets integration (primary + backup worksheets)
-├── llm.py               → LLM API calls (OpenRouter for Gemini / DeepSeek / GPT-OSS, OpenAI for GPT)
+├── llm.py               → LLM API calls (OpenRouter for all four models)
 ├── prompt_similarity.py → Embedding-based prompt deduplication (OpenRouter embeddings)
 ├── notes_store.py       → Per-user SQLite database for saved prompt notes
 ├── iaa_store.py         → SQLite database for inter-annotator agreement reviews
@@ -99,8 +99,7 @@ annotation_app/
 - **Python 3.10+**
 - A **Google Cloud service account** with the Google Sheets & Google Drive APIs enabled
 - API keys for at least one of the supported LLM providers:
-  - **OpenAI** (for GPT-5.2)
-  - **OpenRouter** (for Gemini 3 Flash, DeepSeek V3.2, GPT-OSS-120B)
+  - **OpenRouter** (for Llama 4 Maverick, Qwen3.8-27B, DeepSeek V3.2, GPT-OSS-120B)
 - (Optional) Your own LLM API keys for other models
 
 ---
@@ -265,13 +264,13 @@ STATE_REVIEW_ASSIGNMENT_CONFIGS = {
 
 ### Change LLM Models
 
-Edit **`config.py`** — the `HEADERS` list has 8 model-variant blocks (gemini_base, gemini_identity, gpt_base, gpt_identity, llama_base, llama_identity, deepseek_base, deepseek_identity).
+Edit **`config.py`** — the `HEADERS` list has 8 model-variant blocks (llama4_maverick_base, llama4_maverick_identity, qwen3_8_27b_base, qwen3_8_27b_identity, llama_base, llama_identity, deepseek_base, deepseek_identity).
 
 To change which models are called, edit **`llm.py`**:
 
 - Each `generate_*_output(prompt)` function makes an API call.
 - Replace the model string, API endpoint, and authentication.
-- Currently all models except GPT go through **OpenRouter**. GPT goes through **OpenAI** directly.
+- All four models go through **OpenRouter**.
 - To add/remove a model, you must also update:
   - `config.py` → `HEADERS` list
   - `storage.py` → `build_record()` and `json_to_row()` functions

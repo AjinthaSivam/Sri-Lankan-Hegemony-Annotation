@@ -84,77 +84,90 @@ TEMP_INTER_ANNOTATOR_REVIEW_USER_ALIAS = {
     _normalize_username("ojastest"): _normalize_username("neerav"),
 }
 
+# STATE_REVIEW_ASSIGNMENT_CONFIGS = {
+#     "uttar pradesh": {
+#         "seed": "iaa-up-v1",
+#         "annotators": [
+#             "neerav",
+#             "Manshi Patel",
+#         ],
+#         "per_annotator_quota": {
+#             "neerav": 15,
+#             "Manshi Patel": 15,
+#         },
+#     },
+#     "jammu and kashmir": {
+#         "seed": "iaa-jk-v1",
+#         "annotators": [
+#             "Ashish",
+#             "Sohail Khan",
+#         ],
+#         "per_annotator_quota": {
+#             "Ashish": 15,
+#             "Sohail Khan": 15,
+#         },
+#     },
+#     "bihar": {
+#         "seed": "iaa-bihar-v1",
+#         "annotators": [
+#             "tauseef",
+#             "kameshwari04",
+#         ],
+#         "per_annotator_quota": {
+#             "tauseef": 15,
+#             "kameshwari04": 15,
+#         },
+#     },
+#     "west bengal": {
+#         "seed": "iaa-wb-v1",
+#         "annotators": [
+#             "Arnab6203",
+#             "Subham48",
+#             "Lila Ghimire",
+#         ],
+#         "per_annotator_quota": {
+#             "Arnab6203": 10,
+#             "Subham48": 10,
+#             "Lila Ghimire": 10,
+#         },
+#     },
+#     "haryana": {
+#         "seed": "iaa-haryana-v1",
+#         "annotators": [
+#             "nishtharajput",
+#             "Ajit Rana",
+#             "Priyanka",
+#         ],
+#         "per_annotator_quota": {
+#             "nishtharajput": 10,
+#             "Ajit Rana": 10,
+#             "Priyanka": 10,
+#         },
+#     },
+#     "maharashtra": {
+#         "seed": "iaa-maharashtra-v1",
+#         "annotators": [
+#             "Manasikelkar26",
+#             "Riddhi157",
+#             "Aishwarya Gadgil",
+#         ],
+#         "per_annotator_quota": {
+#             "Manasikelkar26": 10,
+#             "Riddhi157": 10,
+#             "Aishwarya Gadgil": 10,
+#         },
+#     },
+# }
+
 STATE_REVIEW_ASSIGNMENT_CONFIGS = {
-    "uttar pradesh": {
-        "seed": "iaa-up-v1",
-        "annotators": [
-            "neerav",
-            "Manshi Patel",
-        ],
+    "jaffna": {
+        "seed": "iaa-jaffna-v1",
+        # Include both the annotation creator and the cross-district reviewer.
+        # Records created by each participant are assigned to the other one.
+        "annotators": ["moana", "r1"],
         "per_annotator_quota": {
-            "neerav": 15,
-            "Manshi Patel": 15,
-        },
-    },
-    "jammu and kashmir": {
-        "seed": "iaa-jk-v1",
-        "annotators": [
-            "Ashish",
-            "Sohail Khan",
-        ],
-        "per_annotator_quota": {
-            "Ashish": 15,
-            "Sohail Khan": 15,
-        },
-    },
-    "bihar": {
-        "seed": "iaa-bihar-v1",
-        "annotators": [
-            "tauseef",
-            "kameshwari04",
-        ],
-        "per_annotator_quota": {
-            "tauseef": 15,
-            "kameshwari04": 15,
-        },
-    },
-    "west bengal": {
-        "seed": "iaa-wb-v1",
-        "annotators": [
-            "Arnab6203",
-            "Subham48",
-            "Lila Ghimire",
-        ],
-        "per_annotator_quota": {
-            "Arnab6203": 10,
-            "Subham48": 10,
-            "Lila Ghimire": 10,
-        },
-    },
-    "haryana": {
-        "seed": "iaa-haryana-v1",
-        "annotators": [
-            "nishtharajput",
-            "Ajit Rana",
-            "Priyanka",
-        ],
-        "per_annotator_quota": {
-            "nishtharajput": 10,
-            "Ajit Rana": 10,
-            "Priyanka": 10,
-        },
-    },
-    "maharashtra": {
-        "seed": "iaa-maharashtra-v1",
-        "annotators": [
-            "Manasikelkar26",
-            "Riddhi157",
-            "Aishwarya Gadgil",
-        ],
-        "per_annotator_quota": {
-            "Manasikelkar26": 10,
-            "Riddhi157": 10,
-            "Aishwarya Gadgil": 10,
+            "moana": 10,
+            "r1": 10,
         },
     },
 }
@@ -323,12 +336,14 @@ def _get_persisted_state_assignment(records, state_name):
 
     all_assignments = _load_persisted_iar_assignments()
     normalized_assignment = _normalize_persisted_state_assignment(all_assignments.get(normalized_state))
-    if normalized_assignment:
+    # An empty pool can be a stale result from an earlier config or before
+    # records were approved. Rebuild it so new assignments/config changes take effect.
+    if normalized_assignment and normalized_assignment.get("selected_annotation_ids"):
         return normalized_assignment
 
     config = _get_state_review_assignment_config(state_name)
     if not config:
-        return None
+        return normalized_assignment
 
     generated_assignments = _build_seeded_state_review_assignments(records, state_name)
     persistable_assignment = _build_persistable_state_assignment(generated_assignments)
@@ -526,7 +541,8 @@ def _build_seeded_state_selected_records(records, state_name):
 
 def _reviewable_records_for_user(records, user):
     if user.get("role") == "admin":
-        configured_state_names = _persisted_review_state_names()
+        configured_state_names = set(_persisted_review_state_names())
+        configured_state_names.update(STATE_REVIEW_ASSIGNMENT_CONFIGS.keys())
         admin_records = []
         for state_name in configured_state_names:
             persisted_assignment = _get_persisted_state_assignment(records, state_name)
@@ -541,19 +557,24 @@ def _reviewable_records_for_user(records, user):
             if r.get("annotator_name") != user.get("username")
         ]
 
-    state_name = user.get("state")
-    persisted_assignment = _get_persisted_state_assignment(records, state_name)
     reviewer_key = _effective_inter_annotator_review_username(user.get("username"))
-    if persisted_assignment:
-        assigned_ids = (persisted_assignment.get("assignments_by_reviewer") or {}).get(reviewer_key, [])
-        return _record_ids_to_records(records, assigned_ids)
+    # Assignments are grouped by the creator's district. A reviewer may live
+    # elsewhere, so collect their explicit assignments across configured pools.
+    assignment_state_names = set(_persisted_review_state_names())
+    assignment_state_names.update(STATE_REVIEW_ASSIGNMENT_CONFIGS.keys())
+    assigned_records = []
+    for state_name in assignment_state_names:
+        assignment = _get_persisted_state_assignment(records, state_name)
+        if not assignment:
+            continue
+        assigned_ids = (assignment.get("assignments_by_reviewer") or {}).get(reviewer_key, [])
+        assigned_records.extend(_record_ids_to_records(records, assigned_ids))
 
-    config = _get_state_review_assignment_config(state_name)
-    if config:
-        assignments = _build_seeded_state_review_assignments(records, state_name)
-        return assignments.get(reviewer_key, [])
-
-    return []
+    username = user.get("username")
+    return [
+        record for record in _dedupe_records_by_id(_sorted_records_for_sampling(assigned_records))
+        if record.get("annotator_name") != username
+    ]
 
 
 def _load_annotation_record(annotation_id):
@@ -1170,8 +1191,8 @@ def review_annotation(annotation_id):
         return redirect(url_for("prompt_review", info="You have already reviewed this annotation"))
 
     models = [
-        ("gemini", "Model 1"),
-        ("gpt", "Model 2"),
+        ("gemini", "Llama 4 Maverick (17B × 128E)"),
+        ("gpt", "Qwen3.8-27B"),
         ("llama", "Model 3"),
         ("deepseek", "Model 4"),
     ]
@@ -1205,13 +1226,14 @@ def submit_review():
     if not _is_iaa_approved_record(record):
         return redirect(url_for("prompt_review", info="Only approved annotations are eligible for IAA review."))
 
-    if user.get("role") != "admin" and (
-        record.get("state") != user.get("state")
-        or record.get("annotator_name") == user.get("username")
-    ):
+    assigned_ids = {
+        str((assigned_record or {}).get("id") or "").strip()
+        for assigned_record in _reviewable_records_for_user(records, user)
+    }
+    if str(record.get("id") or "").strip() not in assigned_ids:
         abort(403)
 
-    if user.get("role") == "admin" and record.get("annotator_name") == user.get("username"):
+    if record.get("annotator_name") == user.get("username"):
         abort(403)
 
     try:

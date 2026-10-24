@@ -1,13 +1,29 @@
 import json
-from google import genai
-from google.genai import types
 from config import KEYS
-from openai import OpenAI
 import requests
 
 # _gemini_client = genai.Client(api_key=KEYS["GEMINI_API_KEY"])
-_gpt_client = OpenAI(api_key=KEYS["GPT_API_KEY"])
-_deepseek_client =  OpenAI(api_key=KEYS["DEEPSEEK_API_KEY"], base_url="https://api.deepseek.com")
+_OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+
+
+def _openrouter_chat(model: str, prompt: str) -> str:
+    response = requests.post(
+        url=_OPENROUTER_URL,
+        headers={
+            "Authorization": f"Bearer {KEYS['OPENAI_API_KEY']}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "model": model,
+            "messages": [
+                {"role": "system", "content": "Answer in no more than 150 words in English."},
+                {"role": "user", "content": prompt},
+            ],
+        },
+        timeout=120,
+    )
+    response.raise_for_status()
+    return response.json()["choices"][0]["message"]["content"]
 
 # def generate_gemini_output(prompt: str) -> str:
 #     """
@@ -42,53 +58,22 @@ _deepseek_client =  OpenAI(api_key=KEYS["DEEPSEEK_API_KEY"], base_url="https://a
 
 def generate_gemini_output(prompt: str) -> str:
     """
-    Gemini Output Generator
+    Llama 4 Maverick Output Generator (keeps the legacy Model 1 function name).
     """
-    response = requests.post(
-        url="https://openrouter.ai/api/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {KEYS['OPENAI_API_KEY']}",
-            "Content-Type": "application/json",
-        },
-        data=json.dumps({
-            "model": "google/gemini-3-flash-preview",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "Answer in no more than 150 words in English."
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
-        })
-    )
-
-    response = response.json()
-    return response["choices"][0]["message"]["content"]
+    return _openrouter_chat("meta-llama/llama-4-maverick-17b-128e-instruct", prompt)
 
 def generate_gpt_output(prompt: str) -> str:
     """
-    GPT5.2 Output Generator
+    Qwen3.8-27B Output Generator (keeps the legacy Model 2 function name).
     """
-    response = _gpt_client.responses.create(
-        model="gpt-5.2",
-        reasoning={
-            "effort": "low"
-        },
-        instructions= "Answer in no more than 150 words in English.",
-        input=prompt
-    )
-
-    return response.output_text
+    return _openrouter_chat("qwen/qwen3.8-27b", prompt)
 
 def generate_deepseek_output(prompt: str) -> str:
     """
     DeepSeek Output Generator
     """
     response = requests.post(
-    url="https://openrouter.ai/api/v1/chat/completions",
+    url=_OPENROUTER_URL,
     headers={
         "Authorization": f"Bearer {KEYS['OPENAI_API_KEY']}",
         "Content-Type": "application/json",

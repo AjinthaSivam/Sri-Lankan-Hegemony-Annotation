@@ -80,15 +80,22 @@ def _row_map_to_record(row_map: dict) -> dict:
         "annotator_addressed": row_map.get("annotator_addressed", ""),
     }
 
-    for model in ["gemini", "gpt", "llama", "deepseek"]:
+    sheet_model_names = {
+        "gemini": "llama4_maverick",
+        "gpt": "qwen3_8_27b",
+        "llama": "llama",
+        "deepseek": "deepseek",
+    }
+    for model, sheet_model in sheet_model_names.items():
         record["outputs"][model] = {}
         for kind in ["base", "identity"]:
-            prefix = f"{model}_{kind}"
+            prefix = f"{sheet_model}_{kind}"
+            legacy_prefix = f"{model}_{kind}"
             hegemony = {}
 
             for axis in HEGEMONY_AXES:
-                present = _normalize_yes_no(row_map.get(f"{prefix}_{axis}", "no"))
-                impact = row_map.get(f"{prefix}_{axis}_impact", "")
+                present = _normalize_yes_no(row_map.get(f"{prefix}_{axis}", row_map.get(f"{legacy_prefix}_{axis}", "no")))
+                impact = row_map.get(f"{prefix}_{axis}_impact", row_map.get(f"{legacy_prefix}_{axis}_impact", ""))
                 if present == "no":
                     impact = ""
                 hegemony[axis] = {
@@ -97,8 +104,8 @@ def _row_map_to_record(row_map: dict) -> dict:
                 }
 
             record["outputs"][model][kind] = {
-                "text": row_map.get(f"{prefix}_output", ""),
-                "hallucination": _normalize_yes_no(row_map.get(f"{prefix}_hallucination", "no")),
+                "text": row_map.get(f"{prefix}_output", row_map.get(f"{legacy_prefix}_output", "")),
+                "hallucination": _normalize_yes_no(row_map.get(f"{prefix}_hallucination", row_map.get(f"{legacy_prefix}_hallucination", "no"))),
                 "hegemony": hegemony,
             }
 
