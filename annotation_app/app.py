@@ -1273,7 +1273,7 @@ def freshannotate():
     session.pop("editing_id", None)
     if draft_id:
         delete_draft(draft_id)
-    return redirect("/")
+    return redirect(url_for("annotate"))
 
 @app.route("/examples")
 def examples():
@@ -1351,7 +1351,7 @@ def confirm():
     delete_draft(draft_id)
     print(f"confirm persisted annotation {saved_id} ({mode})")
 
-    return redirect("/")
+    return redirect(url_for("annotate"))
 
 @app.route("/records")
 @admin_required
