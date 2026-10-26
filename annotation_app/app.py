@@ -40,6 +40,26 @@ import random
 from urllib.parse import urlencode
 
 app = Flask(__name__)
+
+import os
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+class PrefixMiddleware:
+    def __init__(self, wsgi_app, prefix):
+        self.wsgi_app = wsgi_app
+        self.prefix = (prefix or "").rstrip("/")
+
+    def __call__(self, environ, start_response):
+        if self.prefix:
+            environ["SCRIPT_NAME"] = self.prefix
+            path = environ.get("PATH_INFO", "")
+            if path.startswith(self.prefix):  # in case nginx doesn't strip it
+                environ["PATH_INFO"] = path[len(self.prefix):] or "/"
+        return self.wsgi_app(environ, start_response)
+
+app.wsgi_app = PrefixMiddleware(app.wsgi_app, os.environ.get("APP_PREFIX", ""))
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
 app.secret_key = KEYS["FLASK_SECRET_KEY"]
 app.register_blueprint(auth_bp)
 initialize_iaa_storage()
